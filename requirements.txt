@@ -1,0 +1,4 @@
+#Moteur Web
+Django
+PyMySQL
+pillow
