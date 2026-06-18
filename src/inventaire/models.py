@@ -12,20 +12,23 @@ class CustomUser(AbstractUser):
     phone = models.CharField(blank=True, max_length=20)
 
     #Type d'utilisateur (cf. liste)
-    usertype = models.IntegerChoices("Type d'utilisateur", "Élève Enseignant Administratif")
+    usertype = models.IntegerField(choices=models.IntegerChoices("Utilisateur", "Élève Enseignant Administratif"), default=1)
     STUDENT = 1
     TEACHER = 2
     ADMINISTRATOR = 3
 
     #Genre
-    gender = models.IntegerChoices("Genre", "Homme Femme")
-    MALE,_ = gender.choices[0]
-    FEMALE,_ = gender.choices[1]
+    gender = models.IntegerField(choices=models.IntegerChoices("Genre", "Homme Femme"), default = 1)
+    MALE = 1
+    FEMALE = 2
 
     #Sont inclus d'office : Nom, prénom, identifiant, mot de passe, courriel
 
     USERNAME_FIELD = "cardid"
-    REQUIRED_FIELDS = []
+    REQUIRED_FIELDS = ["first_name", "last_name", "username"]
+
+    def __str__(self):
+        return self.first_name + " " + self.last_name + " (" + self.cardid + ")"
 
 
 """"
@@ -38,22 +41,35 @@ class Place(models.Model):
     designation = models.CharField(max_length=200)
 
     #Le type d'emplacement (ou le mode de rangement à l'intérieur)
-    placetype = models.IntegerChoices("Type de conteneur", "Unique Ligne Colonne Grille")
+    placetype = models.IntegerField(choices=models.IntegerChoices("Conteneur", "Unique Ligne Colonne Grille"), default=1)
+    UNIQUE = 1
+    LIGNE = 2
+    COLONNE = 3
+    GRILLE = 4
 
     #Le nombre de rangées de stockage
-    lines = models.PositiveSmallIntegerField(blank=True)
+    lines = models.PositiveSmallIntegerField(blank=True, null=True)
 
     #Le nombre de colonnes de stockage
-    columns = models.PositiveSmallIntegerField(blank=True)
+    columns = models.PositiveSmallIntegerField(blank=True, null=True)
 
     #Le nombre de cases de rangement disponible dans un emplacement
-    subpositions = models.PositiveSmallIntegerField(blank=True)
+    subpositions = models.PositiveSmallIntegerField(blank=True, null=True)
 
     #L'emplacement parent de l'emplacement, s'il existe.
     parent = models.ForeignKey('self', on_delete=models.CASCADE, blank=True, null=True)
 
     #Nom court pour générer un code d'emplacement
     referencename = models.CharField(max_length=10)
+
+    def __str__(self):
+        data = self.referencename
+        item = self.parent
+
+        while item != None:
+            data = item.referencename + data
+            item = item.parent
+        return data
 
 
 """
@@ -73,13 +89,16 @@ class Suppliers(models.Model):
     phone = models.CharField(blank=True, max_length=20)
 
     #Adresse postale du fournisseur
-    adress = models.CharField(blank=True, max_length=254)
-    zipcode = models.PositiveIntegerField(blank=True)
+    address = models.CharField(blank=True, max_length=254)
+    zipcode = models.CharField(blank=True, max_length=20)
     city = models.CharField(blank=True, max_length=150)
     country = models.CharField(blank=True, max_length=150)
 
     #Délai moyen de livraison du fournisseur
-    supplydelay = models.IntegerChoices("Délai de livraison", "Rapide Moyen Lent")
+    supplydelay = models.IntegerField(choices=models.IntegerChoices("Livraison", "Rapide Moyen Lent"), default=3)
+
+    def __str__(self):
+        return self.name
 
 
 """
@@ -98,9 +117,9 @@ class Item(models.Model):
 
     #Emplacement de l'élément
     position = models.ForeignKey(Place, on_delete=models.PROTECT)
-    positionline = models.PositiveSmallIntegerField(blank=True)
-    positioncolumn = models.PositiveSmallIntegerField(blank=True)
-    positionsubposition = models.PositiveSmallIntegerField(blank=True)
+    positionline = models.PositiveSmallIntegerField(blank=True, null=True)
+    positioncolumn = models.PositiveSmallIntegerField(blank=True, null=True)
+    positionsubposition = models.PositiveSmallIntegerField(blank=True, null=True)
 
     #Nombre de composants en stock
     quantity = models.PositiveIntegerField()
@@ -111,6 +130,9 @@ class Item(models.Model):
 
     #Image du composant
     image = models.ImageField(upload_to="uploads/images/%Y/%m/%d/", max_length=250, blank=True)
+
+    def __str__(self):
+        return self.designation
 
 
 """
@@ -126,10 +148,15 @@ class ItemSuppliers(models.Model):
 
     #Dernier prix connu
     lastprice = models.DecimalField(max_digits=20, decimal_places=3)
-    taxes = models.IntegerChoices("Taxes", "HT TTC")
+    taxes = models.IntegerField(choices=models.IntegerChoices("Taxes", "HT TTC"), default=2)
+    HT=1
+    TTC=2
 
     #Référence fournisseur
     supplierreference = models.CharField(max_length=254)
+
+    def __str__(self):
+        return str(self.itemid) + " - " + str(self.supplierid)
 
 
 """
@@ -139,12 +166,18 @@ class ItemRessource(models.Model):
     #Item concerné
     itemid = models.ForeignKey(Item, on_delete=models.CASCADE)
 
+    #Nom de la ressource
+    ressourcename = models.CharField(max_length=200, default="")
+
     #Type de ressource
-    ressourcetype = models.IntegerChoices("Type de ressource", "Driver Documentation Exemple Sources")
+    ressourcetype = models.IntegerField(choices=models.IntegerChoices("Ressource", "Driver Documentation Exemple Sources Autre"), default=1)
 
     #Lien vers la ressource
     ressourceurl = models.URLField(blank=True)
     ressourcefile = models.FileField(upload_to="uploads/ressources/%Y/%m/%d/", blank=True, max_length=200)
+
+    def __str__(self):
+        return str(self.itemid) + " - " + self.ressourcename
 
 
 """
@@ -162,6 +195,9 @@ class Characteristics(models.Model):
 
     #Item concerné
     itemid = models.ForeignKey(Item, on_delete=models.CASCADE)
+
+    def __str__(self):
+        return str(self.itemid) + " - " + self.name
 
 
 """
@@ -181,7 +217,7 @@ class Rental(models.Model):
     returndate = models.DateTimeField()
 
     #Date de clôture de l'emprunt (tout est soldé)
-    closedate = models.DateTimeField()
+    closedate = models.DateTimeField(blank=True, null=True)
 
     #Type de clôture
     CLOTURE_CHOICES = {
@@ -195,6 +231,9 @@ class Rental(models.Model):
 
     #Commentaire sur l'emprunt
     comment = models.TextField(blank=True)
+
+    def __str__(self):
+        return str(self.userid) + " - " + str(self.rentdate)
 
 
 """
@@ -218,3 +257,6 @@ class RentalItem(models.Model):
 
     #Quantitée perdue, cassée ou volée
     lostquantity = models.PositiveIntegerField(blank=True)
+
+    def __str__(self):
+        return str(self.rentalid) + " - " + str(self.itemid)

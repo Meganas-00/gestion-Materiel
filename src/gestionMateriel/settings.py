@@ -18,7 +18,6 @@ pymysql.install_as_MySQLdb()
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/6.0/howto/deployment/checklist/
 
@@ -73,7 +72,7 @@ TEMPLATES = [
 WSGI_APPLICATION = 'gestionMateriel.wsgi.application'
 
 AUTH_USER_MODEL = 'inventaire.CustomUser'
-AUTHENTICATION_BACKENDS = ['inventaire.authenticator']
+AUTHENTICATION_BACKENDS = ['inventaire.authenticator.CardAuthenticateBackend']
 
 # Database
 # https://docs.djangoproject.com/en/6.0/ref/settings/#databases
@@ -127,6 +126,7 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/6.0/howto/static-files/
 
 STATIC_URL = 'static/'
-STATICSFILES_DIRS = [
+STATICFILES_DIRS = [
     BASE_DIR / "static",
+    BASE_DIR / "inventaire/static",
 ]
