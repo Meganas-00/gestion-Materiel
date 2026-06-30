@@ -49,6 +49,13 @@ urlpatterns = [
     path('fournisseurs/search/<str:search>/', viewssuppliers.supplierssearch, name="supplierssearch"),
     path('fournisseurs/search/<str:search>/<int:page>/', viewssuppliers.supplierssearch, name="supplierssearch"),
 
+    #Tarifs fournisseurs
+    path('item/<int:id>/prix', views.itemprice, name="itemprix"),
+    path('item/<int:id>/prix/form/', views.itempriceform, name="itemprixform"),
+    path('item/<int:id>/prix/form/<int:priceid>', views.itempriceform, name="itemprixform"),
+    path('item/<int:id>/prix/add/', views.itempriceadd, name="itemprixadd"),
+    path('item/<int:id>/prix/update/<int:priceid>', views.itempriceadd, name="itemprixadd"),
+    path('item/<int:id>/prix/delete/<int:priceid>', views.itempricedelete, name="itemprixdelete"),
 
 
     # Authentification

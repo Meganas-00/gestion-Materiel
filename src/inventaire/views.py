@@ -287,3 +287,93 @@ def itemdelete(request, id):
     Item.objects.get(pk = id).delete()
     return HttpResponse("Suppression effectuée avec succès")
 
+
+
+"""
+
+    Gestion des prix fournisseurs
+
+"""
+def itemprice(request, id):
+    log = request.user.is_authenticated
+    if not log:
+        return HttpResponseForbidden("Accès à cette ressource non autorisé. Vous devez être connecté pour accéder à cette ressource.")
+
+    context = {
+        "SupplierPriceData":ItemSuppliers.objects.filter(itemid__pk = id)
+    }
+
+    return render(request, "inventaire/itemprice.html", context)
+
+def itempriceform(request, id, priceid = None):
+    log = request.user.is_authenticated
+    if not log:
+        return HttpResponseForbidden("Accès à cette ressource non autorisé. Vous devez être connecté pour accéder à cette ressource.")
+
+    if(request.user.usertype <= 1 or request.user.usertype >= 4):
+        raise PermissionDenied
+
+    if priceid == None:
+        context = {
+            "PriceForm":PriceForm({'itemid': id}),
+            "id":""
+        }
+    else:
+        data = ItemSuppliers.objects.get(pk=priceid)
+        context = {
+            "PriceForm":PriceForm(instance=data),
+            "id":priceid
+        }
+
+    return render(request, "inventaire/itempriceform.html", context)
+
+def itempriceadd(request, id, priceid = None):
+    log = request.user.is_authenticated
+    if not log:
+        raise PermissionDenied
+
+    if(request.user.usertype <= 1 or request.user.usertype >= 4):
+        raise PermissionDenied
+
+    if request.method == 'POST':
+        if(priceid == None):
+            form = PriceForm(request.POST)
+            if form.is_valid():
+                form.save()
+                return HttpResponse("Sauvegarde effectuée")
+        else:
+            item = ItemSuppliers.objects.get(pk=priceid)
+            form = PriceForm(request.POST, instance=item)
+            if form.is_valid():
+                form.save()
+                return HttpResponse("Sauvegarde effectuée")
+
+        return HttpResponse("Une erreur d'enregistrement est survenue")
+
+
+
+def itempricedelete(request, id, priceid):
+    log = request.user.is_authenticated
+    if not log:
+        raise PermissionDenied
+
+    if(request.user.usertype <= 1 or request.user.usertype >= 4):
+        raise PermissionDenied
+
+    if request.method == 'POST':
+        ItemSuppliers.objects.get(pk = priceid).delete()
+        return HttpResponse("Suppression effectuée avec succès")
+
+    return HttpResponse("Echec de la suppression")
+
+
+def itemdelete(request, id):
+    log = request.user.is_authenticated
+    if not log:
+        raise PermissionDenied
+
+    if(request.user.usertype <= 1 or request.user.usertype >= 4):
+        raise PermissionDenied
+
+    Item.objects.get(pk = id).delete()
+    return HttpResponse("Suppression effectuée avec succès")

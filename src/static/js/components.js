@@ -1,6 +1,7 @@
-let LAST_SELECTED = ""
-let LAST_SELECTED_CARAC = ""
+let LAST_SELECTED = "";
+let LAST_SELECTED_CARAC = "";
 let LAST_SELECTED_RES = "";
+let LAST_SELECTED_PRICE = "";
 
 
 /*
@@ -51,10 +52,13 @@ function inittable()
     createForm = document.getElementById("addnewbutton");
     createForm.addEventListener("click", (event) => {
         getForm();
-        document.getElementById("caractform").innerHTML = "";
-        document.getElementById("caractdata").innerHTML = "";
-        document.getElementById("ressourceform").innerHTML = "";
-        document.getElementById("ressourcedata").innerHTML = "";
+        data = '<div class="alert alert-primary" role="alert">Rien à afficher pour le moment</div>'
+        document.getElementById("caractform").innerHTML = data;
+        document.getElementById("caractdata").innerHTML = data;
+        document.getElementById("ressourceform").innerHTML = data;
+        document.getElementById("ressourcedata").innerHTML = data;
+        document.getElementById("priceform").innerHTML = data;
+        document.getElementById("pricedata").innerHTML = data;
     });
 }
 
@@ -97,6 +101,8 @@ function getForm(id=null)
         getFormCaract(id);
         getTableRessource(id);
         getFormRessource(id);
+        getTablePrice(id);
+        getFormPrice(id);
     }
     else
     {
@@ -252,13 +258,6 @@ function getTableCaract(id)
 
 
 
-
-
-
-
-
-
-
 function getFormRessource(id, idcaract="")
 {
     fetch('/item/'+id+'/ressources/form/'+idcaract)
@@ -284,10 +283,7 @@ function getFormRessource(id, idcaract="")
                 formData.append('ressourcename', document.getElementById("id_ressourcename").value);
                 formData.append('ressourcetype', document.getElementById("id_ressourcetype").value);
                 formData.append('ressourceurl', document.getElementById("id_ressourceurl").value);
-                //formData.append('ressourcefile', document.getElementById("id_ressourcefile").files[0], document.getElementById("id_ressourcefile").files[0].name);
                 formData.append('ressourcefile', document.getElementById("id_ressourcefile").files[0]);
-                //file = new File(document.getElementById("id_ressourcefile").files[0],);
-                //formData.append('ressourcefile', );
                 formData.append('itemid', document.getElementById("id_itemid").value);
                 formData.append('csrfmiddlewaretoken',document.querySelector('.resform [name=csrfmiddlewaretoken]').value)
 
@@ -396,6 +392,149 @@ function getTableRessource(id)
                     document.getElementById(item.id).classList.add("table-primary");
                     LAST_SELECTED_RES = item.id;
                     getFormRessource(id, item.getAttribute('aria-id'));
+                });
+            });
+
+    });
+}
+
+
+
+
+
+
+
+
+function getFormPrice(id, idprice="")
+{
+    fetch('/item/'+id+'/prix/form/'+idprice)
+    .then(reponse => reponse.text())
+    .then(data => {
+        place = document.getElementById("priceform");
+        place.innerHTML = data;
+    })
+    .then(nothing => {
+        /*
+         * Configuration du bouton d'enregistrement
+         */
+        function save(event)
+        {
+            if( document.getElementById("id_lastprice").value != "" &&
+                document.getElementById("id_supplierid").value != "" &&
+                document.getElementById("id_taxes").value != "" &&
+                document.getElementById("id_supplierreference").value != ""
+            )
+            {
+                event.preventDefault();
+                let formData = new FormData();
+                formData.append('lastprice', document.getElementById("id_lastprice").value);
+                formData.append('supplierid', document.getElementById("id_supplierid").value);
+                formData.append('taxes', document.getElementById("id_taxes").value);
+                formData.append('supplierreference', document.getElementById("id_supplierreference").value);
+                formData.append('itemid', document.getElementById("id_itemid").value);
+                formData.append('csrfmiddlewaretoken',document.querySelector('.priceform [name=csrfmiddlewaretoken]').value)
+
+                let url = "";
+                if(document.getElementById("priceformrefid").value == "")
+                {
+                    url = '/item/'+id+'/prix/add/';
+                }
+                else
+                {
+                    url = '/item/'+id+'/prix/update/'+document.getElementById("priceformrefid").value
+                }
+
+                fetch(url, {
+                    method: "POST",
+                    body: formData,
+                    headers: {'X-CSRFToken': document.querySelector('.priceform [name=csrfmiddlewaretoken]').value,
+
+                    },
+                })
+                .then(reponse => reponse.text())
+                .then(data => {
+                    console.log(data);
+                    getTablePrice(id);
+                    getFormPrice(id);
+                })
+            }
+        }
+        caractbutton = document.getElementById("pricesave");
+        caractbutton.addEventListener("click", (event) => save(event));
+        caractbutton.addEventListener("keypress", (event) => {
+            if(event.key == "Enter"){save(event);}
+        });
+
+        /*
+         * Configuration du bouton de reset
+         */
+        function reset(event)
+        {
+            event.preventDefault();
+            getFormPrice(id);
+        }
+
+        caractbutton = document.getElementById("pricereset")
+        caractbutton.addEventListener("click", (event) => reset(event));
+        caractbutton.addEventListener("keypress", (event) => {
+            if(event.key == "Enter"){reset(event);}
+        });
+
+        /*
+         * Configuration du bouton de suppression
+         */
+        function del(event)
+        {
+            event.preventDefault();
+
+            if( document.getElementById("priceformrefid").value != "")
+            {
+                let formData = new FormData();
+                formData.append('priceformrefid', document.getElementById("priceformrefid").value);
+                formData.append('csrfmiddlewaretoken',document.querySelector('[name=csrfmiddlewaretoken]').value)
+
+                    fetch('/item/'+id+'/prix/delete/'+document.getElementById("priceformrefid").value, {
+                        method: "POST",
+                        body: formData,
+                        headers: {'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value}
+                    })
+                    .then(reponse => reponse.text())
+                    .then(data => {
+                        console.log(data);
+                        getTablePrice(id);
+                        getFormPrice(id);
+                    })
+            }
+        }
+        caractbutton = document.getElementById("pricedelete")
+        caractbutton.addEventListener("click", (event) => del(event));
+        caractbutton.addEventListener("keypress", (event) => {
+            if(event.key == "Enter"){del(event);}
+        });
+    });
+}
+
+function getTablePrice(id)
+{
+    LAST_SELECTED_PRICE = "";
+    fetch('/item/'+id+'/prix')
+    .then(reponse => reponse.text())
+    .then(data => {
+        place = document.getElementById("pricedata");
+        place.innerHTML = data;
+    })
+    .then(data => {
+        tableData = document.querySelectorAll("tr.tr-table-price");
+        tableData.forEach(
+            function (item) {
+                item.addEventListener("click", (event) => {
+                    if(LAST_SELECTED_PRICE != "")
+                    {
+                        document.getElementById(LAST_SELECTED_PRICE).classList.remove('table-primary');
+                    }
+                    document.getElementById(item.id).classList.add("table-primary");
+                    LAST_SELECTED_PRICE = item.id;
+                    getFormPrice(id, item.getAttribute('aria-id'));
                 });
             });
 

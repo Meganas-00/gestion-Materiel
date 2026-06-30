@@ -73,3 +73,18 @@ class SupplierForm(forms.ModelForm):
             "country": "Pays",
             "supplydelay": "Délai moyen de livraison"
         }
+
+class PriceForm(forms.ModelForm):
+    class Meta:
+        model = ItemSuppliers
+        fields = "__all__"
+        widgets = {
+            'itemid':forms.HiddenInput(attrs={'id': 'res_itemid'}),
+            'pk':forms.HiddenInput(attrs={'id': 'res_pk'}),
+        }
+        labels = {
+            "lastprice": "Dernier prix connu",
+            "supplierid": "Fournisseur",
+            "taxes": "Taxes",
+            "supplierreference": "Référence fournisseur"
+        }
