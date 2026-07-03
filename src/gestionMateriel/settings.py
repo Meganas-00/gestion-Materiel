@@ -41,7 +41,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'inventaire',
     'widget_tweaks',
-    'treewidget',
+    'mptt',
 ]
 
 MIDDLEWARE = [

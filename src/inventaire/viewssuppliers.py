@@ -1,5 +1,5 @@
 from django.shortcuts import render
-from django.http import HttpResponse
+from django.http import HttpResponse, HttpResponseForbidden, HttpResponseBadRequest
 from django.template import loader
 from django.core.exceptions import PermissionDenied
 

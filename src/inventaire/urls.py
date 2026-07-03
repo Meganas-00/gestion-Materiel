@@ -1,9 +1,9 @@
 from django.urls import path
-from . import views, viewssuppliers
+from . import views, viewssuppliers, viewsplace
 
 urlpatterns = [
     #homepage
-    path('', views.home, name="homepage"),
+    path('', views.home, name="home"),
     path('composants/', views.components, name="components"),
     path('composants/list/<int:page>/', views.components, name="components"),
 
@@ -57,8 +57,17 @@ urlpatterns = [
     path('item/<int:id>/prix/update/<int:priceid>', views.itempriceadd, name="itemprixadd"),
     path('item/<int:id>/prix/delete/<int:priceid>', views.itempricedelete, name="itemprixdelete"),
 
+    #Emplacements
+    path('emplacements/', viewsplace.places, name="places"),
+    path('emplacements/list', viewsplace.tree, name="placestree"),
+    path('emplacements/racine/ajouter/', viewsplace.newroot, name="newroot"),
+    path('emplacements/<int:id>/modifier/', viewsplace.placeproperties, name="placeproperties"),
+    path('emplacements/<int:id>/ajouter/', viewsplace.newchild, name="newchild"),
+    path('emplacements/update/<int:id>/', viewsplace.placeupdate, name="placeupdate"),
+    path('emplacements/add/', viewsplace.placeupdate, name="placeupdate"),
+    path('emplacements/<int:id>/supprimer/', viewsplace.deletechild, name="deletechild"),
 
     # Authentification
-    path('connect', views.home, name="connexion"), #Need an update
-    path('disconnect', views.home, name="deconnexion"), #Need an update
+    path('login', views.seConnecter, name="connexion"),
+    path('logout', views.seDeconnecter, name="deconnexion"), #Need an update
 ]

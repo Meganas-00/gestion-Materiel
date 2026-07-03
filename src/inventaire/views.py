@@ -1,5 +1,6 @@
+from django.contrib.auth import authenticate, login, logout
 from django.shortcuts import render
-from django.http import HttpResponse
+from django.http import HttpResponse, HttpResponseForbidden
 from django.template import loader
 from django.core.exceptions import PermissionDenied
 
@@ -25,7 +26,7 @@ def components(request, page=1):
     nbitems = Item.objects.count();
     context = {
         "Title":"Composants",
-        "Username": request.user.first_name + request.user.last_name,
+        "Username": request.user.first_name + ' ' + request.user.last_name,
         "Grade": "",
         "ListItems": mark_safe(componentssearch(request, "", page).content.decode('utf-8')),
     }
@@ -377,3 +378,30 @@ def itemdelete(request, id):
 
     Item.objects.get(pk = id).delete()
     return HttpResponse("Suppression effectuée avec succès")
+
+
+
+def seConnecter(request):
+    if request.method == "POST":
+        try:
+            user = authenticate(username=request.POST["login"], password=request.POST["password"])
+            if user is not None:
+                login(request, user)
+                return redirect("/")
+            else:
+                return redirect("/login/")
+        except KeyError:
+            return HttpResponse("Données invalides fournies")
+
+    else:
+        context = {
+            'LoginForm': loginForm(),
+            "Title":"Se connecter",
+        }
+        if request.method =="GET" and "msg" in request.GET:
+            context["Message"] = request.GET["msg"]
+        return render(request, "inventaire/login.html", context)
+
+def seDeconnecter(request):
+    logout(request)
+    return redirect("/")

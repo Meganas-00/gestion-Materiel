@@ -82,7 +82,6 @@ function getForm(id=null)
             }
 
             const formdelete = document.getElementById("supformdel");
-            console.log(formdelete);
             formdelete.addEventListener("click", (event) => {
                 updatebutton(event);
             });

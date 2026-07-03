@@ -1,6 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser
-
+from mptt.models import MPTTModel, TreeForeignKey
 """
 Classe définissant les utilisateurs du système
 """
@@ -36,7 +36,7 @@ Classe définissant les emplacements de stockage. Chaque niveau d'emplacement
 doit être défini, par exemple : Bâtiment H, puis Salle H110 Bis, puis
 Armoire du fond, puis étage, ..., selon le degré de précision souhaité
 """
-class Place(models.Model):
+class Place(MPTTModel):
     #Nom de l'emplacement. Par exemple : H110, Armoire n°3, bâtiment J, etc.
     designation = models.CharField(max_length=200)
 
@@ -57,7 +57,10 @@ class Place(models.Model):
     subpositions = models.PositiveSmallIntegerField(blank=True, null=True)
 
     #L'emplacement parent de l'emplacement, s'il existe.
-    parent = models.ForeignKey('self', on_delete=models.CASCADE, blank=True, null=True)
+    parent = TreeForeignKey('self', on_delete=models.CASCADE, blank=True, null=True, related_name='children')
+
+    class MPTTMeta:
+        order_insertion_by = ['designation']
 
     #Nom court pour générer un code d'emplacement
     referencename = models.CharField(max_length=10)

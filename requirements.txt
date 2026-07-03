@@ -3,3 +3,4 @@ Django
 PyMySQL
 pillow
 django-widget-tweaks
+django-mptt

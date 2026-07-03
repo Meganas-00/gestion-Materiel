@@ -1,5 +1,6 @@
 from django import forms
 from .models import *
+from mptt.forms import TreeNodeChoiceField
 
 class ItemForm(forms.ModelForm):
     class Meta:
@@ -9,6 +10,7 @@ class ItemForm(forms.ModelForm):
             'image': forms.FileInput(),
             'consumable':forms.CheckboxInput(),
             'pk':forms.HiddenInput(),
+            #'position':forms.ChoiceField(queryset=Place.objects.all())
 
         }
         labels = {
@@ -88,3 +90,27 @@ class PriceForm(forms.ModelForm):
             "taxes": "Taxes",
             "supplierreference": "Référence fournisseur"
         }
+
+class CustomUserForm(forms.ModelForm):
+    class Meta:
+        model = ItemSuppliers
+        fields = "__all__"
+        widgets = {
+            'pk':forms.HiddenInput(attrs={'id': 'res_pk'}),
+        }
+        labels = {
+            "cardid": "Carte du lycée",
+            "phone": "n° de téléphone",
+            "usertype": "type d'utilisateur",
+            "gender": "Genre",
+            "username": "Nom d'utilisateur",
+            "first_name": "Prénom",
+            "last_name": "Nom",
+            "email": "Courriel",
+            "password": "Mot de passe",
+        }
+
+
+class loginForm(forms.Form):
+    login = forms.CharField(label="Identifiant")
+    password = forms.CharField(label="Mot de Passe",widget=forms.PasswordInput)

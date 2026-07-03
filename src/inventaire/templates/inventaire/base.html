@@ -11,6 +11,7 @@
     <link href="{% static 'vendor/fontawesome/css/brands.min.css' %}" rel="stylesheet">
     <link href="{% static 'vendor/bootstrap-icons/bootstrap-icons.css' %}" rel="stylesheet">
     <link href="{% static 'vendor/bootstrap-simple/css/master.css' %}" rel="stylesheet">
+    {% block head %}{% endblock %}
 
     <title>{% block title %}Lycée Réaumur{% endblock %}</title>
 </head>
@@ -23,7 +24,7 @@
             </div>
             <ul class="list-unstyled components text-secondary">
                 <li>
-                    <a href="{% url 'homepage' %}"><i class="fas fa-home"></i>Accueil</a>
+                    <a href="{% url 'home' %}"><i class="fas fa-home"></i>Accueil</a>
                 </li>
 
                 <li>
@@ -36,7 +37,7 @@
                     <a href="{% url 'suppliers' %}"><i class="fas fa-cart-flatbed"></i>Fournisseurs</a>
                 </li>
                 <li>
-                    <a href="#"><i class="fas fa-school"></i>Emplacements</a>
+                    <a href="{% url 'places' %}"><i class="fas fa-school"></i>Emplacements</a>
                 </li>
                 <li>
                     <a href="#"><i class="fas fa-users"></i>Utilisateurs</a>
