@@ -93,10 +93,11 @@ class PriceForm(forms.ModelForm):
 
 class CustomUserForm(forms.ModelForm):
     class Meta:
-        model = ItemSuppliers
-        fields = "__all__"
+        model = CustomUser
+        fields = ["id", "first_name", "last_name", "cardid", "username", "usertype", "gender", "email", "phone", "password"]
         widgets = {
             'pk':forms.HiddenInput(attrs={'id': 'res_pk'}),
+            'password':forms.TextInput(attrs={"type": "password"}),
         }
         labels = {
             "cardid": "Carte du lycée",

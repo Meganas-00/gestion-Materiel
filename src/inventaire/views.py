@@ -14,8 +14,31 @@ from .forms import *
 from .models import *
 
 def home(request):
-    template = loader.get_template("inventaire/base.html")
-    return HttpResponse(template.render({}, request))
+    log = request.user.is_authenticated
+    if not log:
+        context = {
+                "Title":"Accueil",
+                "Username": "",
+                "Grade": "",
+            }
+    else:
+        context = {
+            "Title":"Accueil",
+            "Username": request.user.first_name + ' ' + request.user.last_name,
+            "Grade": "",
+        }
+
+        match(request.user.usertype):
+            case CustomUser.STUDENT:
+                context["Grade"] = "Élève"
+
+            case CustomUser.TEACHER:
+                context["Grade"] = "Enseignant"
+
+            case CustomUser.ADMINISTRATIF:
+                context["Grade"] = "Administratif"
+
+    return render(request, "inventaire/home.html", context)
 
 def components(request, page=1):
     log = request.user.is_authenticated

@@ -26,6 +26,16 @@ def places(request):
         'places': Place.objects.all(),
     }
 
+    match(request.user.usertype):
+        case CustomUser.STUDENT:
+            context["Grade"] = "Élève"
+
+        case CustomUser.TEACHER:
+            context["Grade"] = "Enseignant"
+
+        case CustomUser.ADMINISTRATIF:
+            context["Grade"] = "Administratif"
+
     return render(request, "inventaire/places.html", context)
 
 def newchild(request, id=None):
@@ -42,6 +52,9 @@ def placeproperties(request, id=None, parent=""):
 
     if id != None:
         data = Place.objects.get(pk=id)
+        parent = None
+        if (data.parent != None):
+            parent = data.parent.id
         context = {
             'id': id,
             'designation': data.designation,
@@ -49,7 +62,7 @@ def placeproperties(request, id=None, parent=""):
             'lignes': data.lines,
             'colonnes': data.columns,
             'emplacements': data.subpositions,
-            'parent': data.parent,
+            'parent': parent,
             'refname': data.referencename,
             'formprefix': 'u',
             'url': '/emplacements/update/'+str(id)+'/'
@@ -143,7 +156,7 @@ def placeupdate(request, id=None):
             else:
                 item.subpositions = request.POST['emplacement']
             item.referencename=request.POST['refname']
-            if(request.POST['parent'] != ''):
+            if(request.POST['parent'] != 'None' and request.POST['parent'] != ''):
                 item.parent=Place.objects.get(pk=request.POST['parent'])
             item.save()
             return redirect('places')

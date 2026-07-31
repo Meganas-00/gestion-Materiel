@@ -1,5 +1,5 @@
 from django.urls import path
-from . import views, viewssuppliers, viewsplace
+from . import views, viewssuppliers, viewsplace, viewsuser, viewrental
 
 urlpatterns = [
     #homepage
@@ -66,6 +66,30 @@ urlpatterns = [
     path('emplacements/update/<int:id>/', viewsplace.placeupdate, name="placeupdate"),
     path('emplacements/add/', viewsplace.placeupdate, name="placeupdate"),
     path('emplacements/<int:id>/supprimer/', viewsplace.deletechild, name="deletechild"),
+
+    #Utilisateurs
+    path('utilisateurs/', viewsuser.users, name="users"),
+    path('utilisateurs/list/<int:page>/', viewsuser.users, name="users"),
+    path('utilisateurs/new/', viewsuser.user, name="userproperty"),
+    path('utilisateurs/<int:id>/', viewsuser.user, name="userproperty"),
+    path('utilisateurs/add/', viewsuser.usersave, name="userupdate"),
+    path('utilisateurs/update/<int:id>', viewsuser.usersave, name="usersave"),
+    path('utilisateurs/remove/<int:id>', viewsuser.userdelete, name="userdelete"),
+
+    # Barre de recherche
+    path('utilisateurs/search/', viewsuser.userssearch, name="userssearch"),
+    path('utilisateurs/search/<str:search>/', viewsuser.userssearch, name="userssearch"),
+    path('utilisateurs/search/<str:search>/<int:page>/', viewsuser.userssearch, name="userssearch"),
+
+    #Emprunts
+    path('emprunter/', viewrental.rental, name="rent"),
+    path('emprunter/chercherutilisateur/', viewrental.rentuserlist, name="rentuserlist"),
+    path('emprunter/chercherutilisateur/<str:search>', viewrental.rentuserlist, name="rentuserlist"),
+    path('emprunter/chercherutilisateur/id/<int:userid>', viewrental.rentuser, name="rentuserlist"),
+    path('emprunter/composants/search/', viewrental.searchcomponent, name="rentcomponentfind"),
+    path('emprunter/composants/search/<str:search>', viewrental.searchcomponent, name="rentcomponentfind"),
+    path('emprunter/creer/', viewrental.create, name="create"),
+    path('emprunter/liste/', viewrental.listrent, name="listrent"),
 
     # Authentification
     path('login', views.seConnecter, name="connexion"),

@@ -253,13 +253,13 @@ class RentalItem(models.Model):
     quantity = models.PositiveIntegerField()
 
     #Date de retour du composant
-    returndate = models.DateTimeField(blank=True)
+    returndate = models.DateTimeField(blank=True, null=True)
 
     #Quantité retournée
-    returnedquantity = models.PositiveIntegerField(blank=True)
+    returnedquantity = models.PositiveIntegerField(blank=True, null=True)
 
     #Quantitée perdue, cassée ou volée
-    lostquantity = models.PositiveIntegerField(blank=True)
+    lostquantity = models.PositiveIntegerField(blank=True, null=True)
 
     def __str__(self):
         return str(self.rentalid) + " - " + str(self.itemid)

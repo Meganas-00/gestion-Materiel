@@ -1,5 +1,5 @@
 from django.shortcuts import render
-from django.http import HttpResponse, HttpResponseForbidden, HttpResponseBadRequest
+from django.http import HttpResponse, HttpResponseForbidden, HttpResponseBadRequest, JsonResponse
 from django.template import loader
 from django.core.exceptions import PermissionDenied
 
@@ -12,19 +12,22 @@ from django.conf import settings
 from .forms import *
 from .models import *
 
-def suppliers(request, page=1):
+def users(request, page=1):
     log = request.user.is_authenticated
     if not log:
         return HttpResponseForbidden("Accès à cette ressource non autorisé. Vous devez être connecté pour accéder à cette ressource.")
 
+    if(request.user.usertype <= 1 or request.user.usertype >= 4):
+        return HttpResponseForbidden("Accès à cette ressource non autorisé. Vous n'avez pas les droits nécessaires pour accéder à cette ressource.")
+        
     utilisateur = get_object_or_404(CustomUser.objects,pk=request.user.pk)
 
     nbitems = Item.objects.count();
     context = {
-        "Title":"Fournisseurs",
+        "Title":"Utilisateurs",
         "Username": request.user.first_name + ' ' + request.user.last_name,
         "Grade": "",
-        "ListSuppliers": mark_safe(supplierssearch(request, "", page).content.decode('utf-8')),
+        "ListUsers": mark_safe(userssearch(request, "", page).content.decode('utf-8')),
     }
 
     match(request.user.usertype):
@@ -38,58 +41,57 @@ def suppliers(request, page=1):
             context["Grade"] = "Administratif"
 
 
-    return render(request, "inventaire/suppliers.html",context)
+    return render(request, "inventaire/users.html",context)
 
 
-
-def supplierssearch(request, search="", page=1):
+def userssearch(request, search="", page=1):
     log = request.user.is_authenticated
     if not log:
         return HttpResponseForbidden("Accès à cette ressource non autorisé. Vous devez être connecté pour accéder à cette ressource.")
 
-    results = Suppliers.objects.order_by("-pk").filter(Q(email__icontains=search) | Q(name__icontains=search) | Q(website__icontains=search))
+    results = CustomUser.objects.order_by("-pk").filter(Q(first_name__icontains=search) | Q(last_name__icontains=search) | Q(username__icontains=search) | Q(email__icontains=search) | Q(cardid__icontains=search))
     nbpage = (results.count()//100)+1
     context = {
-        "ListSuppliers": results[(page-1)*100:page*100],
+        "ListUsers": results[(page-1)*100:page*100],
         "page":{
             "current": page,
             "previous": max(page-1,1),
             "next":min(page+1,nbpage),
             "max":nbpage,
             "maxm1":nbpage-1},
-        "FormulaireSupplier":SupplierForm,
+        "FormulaireSupplier":CustomUserForm,
     }
 
-    return render(request, "inventaire/suppliers_list.html", context)
+    return render(request, "inventaire/users_list.html", context)
 
 
-def supplier(request, id=None):
+def user(request, id=None):
     log = request.user.is_authenticated
     if not log:
         return HttpResponseForbidden("Accès à cette ressource non autorisé. Vous devez être connecté pour accéder à cette ressource.")
 
-    supplierform = SupplierForm
+    userform = CustomUserForm
     if(id != None):
-        data = Suppliers.objects.get(pk=id)
-        supplierform = SupplierForm(instance=data)
+        data = CustomUser.objects.get(pk=id)
+        userform = CustomUserForm(instance=data)
     context = {
-        "FormulaireItem":supplierform,
+        "FormulaireItem":userform,
         "FormResponse":"",
         "exist":"",
         "id":""
     }
 
     if id == None:
-        context["FormResponse"]="/fournisseur/add/"
+        context["FormResponse"]="/utilisateurs/add/"
     else:
-        context["FormResponse"]="/fournisseur/update/"+str(id)
+        context["FormResponse"]="/utilisateurs/update/"+str(id)
         context["exist"]="True"
         context["id"]=id
 
-    return render(request, "inventaire/supplierform.html", context)
+    return render(request, "inventaire/userform.html", context)
 
 
-def suppliersave(request, id=None):
+def usersave(request, id=None):
     log = request.user.is_authenticated
     if not log:
         return HttpResponseForbidden("Accès à cette ressource non autorisé. Vous devez être connecté pour accéder à cette ressource.")
@@ -101,23 +103,38 @@ def suppliersave(request, id=None):
     item=None
     if request.method == 'POST':
         if(id == None):
-            form = SupplierForm(request.POST)
+            form = CustomUserForm(request.POST)
             if form.is_valid():
-                form.save()
-                return redirect('suppliers')
+                user = CustomUser.objects.create_user(form.cleaned_data["username"], form.cleaned_data['email'], form.cleaned_data["password"])
+                user.first_name = form.cleaned_data["first_name"]
+                user.last_name = form.cleaned_data["last_name"]
+                user.cardid = form.cleaned_data["cardid"]
+                user.usertype = form.cleaned_data["usertype"]
+                user.gender = form.cleaned_data["gender"]
+                user.phone = form.cleaned_data["phone"]
+                user.save()
+                return redirect('users')
         else:
-            item = Suppliers.objects.get(pk=id)
-            form = SupplierForm(request.POST, instance=item)
+            item = CustomUser.objects.get(pk=id)
+            npass = None
+            if("password" in request.POST and item.password != request.POST["password"]):
+                npass = request.POST["password"]
+
+            form = CustomUserForm(request.POST, instance=item)
             if form.is_valid():
                 form.save()
-                return redirect('suppliers', (item.id//100)+1)
+                if npass != None:
+                    item = CustomUser.objects.get(pk=id)
+                    item.set_password(npass)
+                    item.save()
+                return redirect('users', (item.id//100)+1)
     else:
         raise PermissionDenied
 
     return HttpResponseBadRequest("Requête incorrecte")
 
 
-def supplierdelete(request, id):
+def userdelete(request, id):
     log = request.user.is_authenticated
     if not log:
         raise PermissionDenied
@@ -125,7 +142,7 @@ def supplierdelete(request, id):
     if(request.user.usertype <= 1 or request.user.usertype >= 4):
         raise PermissionDenied
 
-    Suppliers.objects.get(pk = id).delete()
+    CustomUser.objects.get(pk = id).delete()
     return HttpResponse("Suppression effectuée avec succès")
 
 

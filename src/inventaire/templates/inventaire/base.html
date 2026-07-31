@@ -28,7 +28,10 @@
                 </li>
 
                 <li>
-                    <a href="#"><i class="fas fa-basket-shopping"></i>Emprunts</a>
+                    <a href="{% url 'rent' %}"><i class="fas fa-basket-shopping"></i>Emprunter</a>
+                </li>
+                <li>
+                    <a href="{% url 'listrent' %}"><i class="fas fa-exchange-alt"></i>Emprunts</a>
                 </li>
                 <li>
                     <a href="{% url 'components' %}"><i class="fas fa-cube"></i>Composants</a>
@@ -40,7 +43,7 @@
                     <a href="{% url 'places' %}"><i class="fas fa-school"></i>Emplacements</a>
                 </li>
                 <li>
-                    <a href="#"><i class="fas fa-users"></i>Utilisateurs</a>
+                    <a href="{% url 'users' %}"><i class="fas fa-users"></i>Utilisateurs</a>
                 </li>
                 <li>
                     <div class="sidebar-footer text-center p-3">
@@ -56,7 +59,7 @@
                         <ul class="nav navbar-nav ms-auto">
                             {% if Username %}
                             <li class="nav-item">
-                            <a class="nav-link active" aria-current="page" href="#">{{ Username }}{% if Grade %}{{ Grade }}{% endif %}</a>
+                            <a class="nav-link active" aria-current="page" href="#">{{ Username }}{% if Grade %} ({{ Grade }}){% endif %}</a>
                             </li>
                             <li class="nav-item">
                             <a class="nav-link" href="{% url 'deconnexion'%}">Se déconnecter</a>
