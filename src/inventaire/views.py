@@ -164,7 +164,7 @@ def itemcharacteristicsform(request, id, caractid = None):
         return HttpResponseForbidden("Accès à cette ressource non autorisé. Vous devez être connecté pour accéder à cette ressource.")
 
     if(request.user.usertype <= 1 or request.user.usertype >= 4):
-        raise PermissionDenied
+        return HttpResponse("")
 
     if caractid == None:
         context = {
@@ -244,7 +244,7 @@ def itemressourcesform(request, id, caractid = None):
         return HttpResponseForbidden("Accès à cette ressource non autorisé. Vous devez être connecté pour accéder à cette ressource.")
 
     if(request.user.usertype <= 1 or request.user.usertype >= 4):
-        raise PermissionDenied
+        return HttpResponse("")
 
     if caractid == None:
         context = {
@@ -335,7 +335,7 @@ def itempriceform(request, id, priceid = None):
         return HttpResponseForbidden("Accès à cette ressource non autorisé. Vous devez être connecté pour accéder à cette ressource.")
 
     if(request.user.usertype <= 1 or request.user.usertype >= 4):
-        raise PermissionDenied
+        return HttpResponse("")
 
     if priceid == None:
         context = {

@@ -390,18 +390,17 @@ function createRequest()
                     body: data,
                     headers: {'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value}
                 })
-                .then(reponse => reponse.text())
-                .then(data => {
-                    if(data == "Done")
-                    {
-                        document.location.replace('liste/');
-                    }
-                    else
-                    {
-                        div = document.createElement("div");
-                        div.innerHTML = data;
-                        document.getElementById("4rentuser").prepend(div);
-                    }
-                    
-                });
+    .then(reponse => reponse.text())
+    .then(data => {
+        if(data == "Done")
+        {
+            document.location.replace('liste/');
+        }
+        else
+        {
+            div = document.createElement("div");
+            div.innerHTML = data;
+            document.getElementById("4rentuser").prepend(div);
+        }
+    });
 }

@@ -15,7 +15,7 @@
                     </div>
                 </div>
                 <div class="mb-3 col-md-3">
-                    <button type="button" class="btn btn-success"  id="addnewbutton" type="button" style="width:100%"><i class="fas fa-plus"></i></button>
+                    <button type="button" class="btn btn-success"  id="addnewbutton" type="button" style="width:100%" {% if Grade != "Enseignant" and Grade != "Administratif" %}disabled{% endif %}><i class="fas fa-plus"></i></button>
                 </div>
             </div></div>
             <!--<div class="card-body">

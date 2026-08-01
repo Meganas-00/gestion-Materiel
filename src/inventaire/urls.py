@@ -89,9 +89,14 @@ urlpatterns = [
     path('emprunter/composants/search/', viewrental.searchcomponent, name="rentcomponentfind"),
     path('emprunter/composants/search/<str:search>', viewrental.searchcomponent, name="rentcomponentfind"),
     path('emprunter/creer/', viewrental.create, name="create"),
+    path('emprunter/update/', viewrental.update, name="update"),
     path('emprunter/liste/', viewrental.listrent, name="listrent"),
+    path('emprunter/liste/<int:page>', viewrental.listrent, name="listrent"),
+    path('emprunter/liste/search/', viewrental.rentsearch, name="listrentsearch"),
+    path('emprunter/liste/search/<str:search>', viewrental.rentsearch, name="listrentsearch"),
+    path('emprunter/details/<int:id>', viewrental.rentdetail, name="rentdetail"),
 
     # Authentification
-    path('login', views.seConnecter, name="connexion"),
-    path('logout', views.seDeconnecter, name="deconnexion"), #Need an update
+    path('login/', views.seConnecter, name="connexion"),
+    path('logout/', views.seDeconnecter, name="deconnexion"), #Need an update
 ]

@@ -30,12 +30,15 @@
                 <li>
                     <a href="{% url 'rent' %}"><i class="fas fa-basket-shopping"></i>Emprunter</a>
                 </li>
+                {% if Grade == "Enseignant" or Grade == "Administratif" %}
                 <li>
                     <a href="{% url 'listrent' %}"><i class="fas fa-exchange-alt"></i>Emprunts</a>
                 </li>
+                {% endif %}
                 <li>
                     <a href="{% url 'components' %}"><i class="fas fa-cube"></i>Composants</a>
                 </li>
+                {% if Grade == "Enseignant" or Grade == "Administratif" %}
                 <li>
                     <a href="{% url 'suppliers' %}"><i class="fas fa-cart-flatbed"></i>Fournisseurs</a>
                 </li>
@@ -45,6 +48,7 @@
                 <li>
                     <a href="{% url 'users' %}"><i class="fas fa-users"></i>Utilisateurs</a>
                 </li>
+                {% endif %}
                 <li>
                     <div class="sidebar-footer text-center p-3">
                         <strong>Réau Gestion v0.1</strong>

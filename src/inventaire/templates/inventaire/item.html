@@ -29,6 +29,7 @@
 
     {% endfor %}
     </div>
+    {% if Grade == "Enseignant" or Grade == "Administratif" %}
     <div class="d-grid gap-2">
         {% if exist == "True" %}
         <div class="input-group">
@@ -45,4 +46,5 @@
         </button>
         {% endif %}
     </div>
+    {% endif %}
 </form>

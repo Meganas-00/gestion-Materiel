@@ -38,7 +38,7 @@ def rental(request, page=1):
         case CustomUser.ADMINISTRATIF:
             context["Grade"] = "Administratif"
 
-
+    print(request.user.usertype)
     if(request.user.usertype == 1):
         pass
 
@@ -46,7 +46,7 @@ def rental(request, page=1):
         pass
 
 
-    if(request.user.usertype <= 1 or request.user.usertype >= 4):
+    if(request.user.usertype < 1 or request.user.usertype >= 4):
         return HttpResponseForbidden("Accès à cette ressource non autorisé. Vous n'avez pas les droits nécessaires pour accéder à cette ressource.")
 
     return render(request, "inventaire/rent.html",context)
@@ -143,8 +143,138 @@ def create(request):
                                 <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Fermer"></button>
                                 </div>""")
 
-
     return HttpResponse("Done")
 
-def listrent(request):
-    return HttpResponse("Ok")
+def listrent(request, page=1):
+    log = request.user.is_authenticated
+    if not log:
+        return HttpResponseForbidden("Accès à cette ressource non autorisé. Vous devez être connecté pour accéder à cette ressource.")
+
+    if(request.user.usertype <= 1 or request.user.usertype >= 4):
+        return HttpResponseForbidden("Accès à cette ressource non autorisé. Vous n'avez pas les droits nécessaires pour accéder à cette ressource.")
+        
+    utilisateur = get_object_or_404(CustomUser.objects,pk=request.user.pk)
+
+    nbitems = Rental.objects.count();
+    context = {
+        "Title":"Emprunts",
+        "Username": request.user.first_name + ' ' + request.user.last_name,
+        "Grade": "",
+        "ListRent": mark_safe(rentsearch(request, "", page).content.decode('utf-8')),
+    }
+
+    match(request.user.usertype):
+        case CustomUser.STUDENT:
+            context["Grade"] = "Élève"
+
+        case CustomUser.TEACHER:
+            context["Grade"] = "Enseignant"
+
+        case CustomUser.ADMINISTRATIF:
+            context["Grade"] = "Administratif"
+
+
+    return render(request, "inventaire/rent_page.html",context)
+
+
+def rentsearch(request, search="", page=1):
+    log = request.user.is_authenticated
+    if not log:
+        return HttpResponseForbidden("Accès à cette ressource non autorisé. Vous devez être connecté pour accéder à cette ressource.")
+
+    if(request.user.usertype <= 1 or request.user.usertype >= 4):
+        return HttpResponseForbidden("Accès à cette ressource non autorisé. Vous n'avez pas les droits nécessaires pour accéder à cette ressource.")
+
+    results = Rental.objects.order_by("closestatus","-returndate").filter(Q(userid__first_name__icontains=search) | Q(userid__last_name__icontains=search) | 
+                                                                        Q(userid__username__icontains=search) | Q(userid__email__icontains=search) | 
+                                                                        Q(userid__cardid__icontains=search) | Q(comment__icontains=search))
+    nbpage = (results.count()//100)+1
+    context = {
+        "ListRent": results[(page-1)*100:page*100],
+        "page":{
+            "current": page,
+            "previous": max(page-1,1),
+            "next":min(page+1,nbpage),
+            "max":nbpage,
+            "maxm1":nbpage-1},
+    }
+
+    return render(request, "inventaire/rentlist.html", context)
+
+def rentdetail(request, id):
+    log = request.user.is_authenticated
+    if not log:
+        return HttpResponseForbidden("Accès à cette ressource non autorisé. Vous devez être connecté pour accéder à cette ressource.")
+
+    if(request.user.usertype <= 1 or request.user.usertype >= 4):
+        return HttpResponseForbidden("Accès à cette ressource non autorisé. Vous n'avez pas les droits nécessaires pour accéder à cette ressource.")
+
+    items = RentalItem.objects.filter(rentalid=Rental.objects.get(pk=id)).order_by("itemid__designation")
+    items_to_send={
+        "user":{
+            "first_name":items[0].rentalid.userid.first_name,
+            "last_name":items[0].rentalid.userid.last_name,
+        },
+        "rent":items[0].rentalid.pk,
+        "items":[],
+    }
+
+    for item in items:
+        items_to_send["items"].append({
+            "id": item.pk,
+            "iditem": item.itemid.pk,
+            "designation": item.itemid.designation,
+            "quantity": item.quantity,
+            "returned_quantity":item.returnedquantity,
+            "returned_date": item.returndate,
+            "lost_quantity": item.lostquantity,
+        })
+    return JsonResponse(items_to_send)
+
+def update(request):
+    log = request.user.is_authenticated
+    if not log:
+        return HttpResponseForbidden("Accès à cette ressource non autorisé. Vous devez être connecté pour accéder à cette ressource.")
+
+    utilisateur = get_object_or_404(CustomUser.objects,pk=request.user.pk)
+
+    if(request.user.usertype <= 1 or request.user.usertype >= 4):
+        return HttpResponseForbidden("Accès à cette ressource non autorisé. Vous n'avez pas les droits nécessaires pour accéder à cette ressource.")
+
+    data = json.loads(request.POST["json"])
+
+    try:
+        rent = Rental.objects.get(pk=data["rent"])
+        if(data["status"] != "ATTENTE"):
+            rent.closedate = datetime.now()
+        rent.closestatus = data["status"]
+        rent.save()
+
+        for item in data["items"]:
+            ref = RentalItem.objects.get(pk=item["id"])
+            if(ref.lostquantity == None):
+                ref.lostquantity = 0
+            
+            if(ref.lostquantity != item["loosed"]):
+                diff = ref.lostquantity - item["loosed"]
+                ressource = Item.objects.get(pk = ref.itemid.pk)
+                ressource.quantity += diff
+                print(ressource.quantity)
+                ressource.save()
+
+            ref.lostquantity = item["loosed"]
+            ref.returnedquantity = item["returned"]
+
+            if(ref.returnedquantity + ref.lostquantity == ref.quantity):
+                ref.returndate = datetime.now()
+
+            ref.save()
+
+        return HttpResponse("Done")
+    except:
+        return HttpResponse(""" <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                                        <strong>Une erreur est survenue, merci de réessayer plus tard</strong>
+                                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Fermer"></button>
+                                        </div>""")
+
+    
