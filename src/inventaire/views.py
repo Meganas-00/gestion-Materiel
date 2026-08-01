@@ -101,8 +101,19 @@ def itemproperty(request, id=None):
     context = {
         "FormulaireItem":itemform,
         "FormResponse":"",
-        "exist":""
+        "exist":"",
+        "Grade":"",
     }
+
+    match(request.user.usertype):
+        case CustomUser.STUDENT:
+            context["Grade"] = "Élève"
+
+        case CustomUser.TEACHER:
+            context["Grade"] = "Enseignant"
+
+        case CustomUser.ADMINISTRATIF:
+            context["Grade"] = "Administratif"
 
     if id == None:
         context["FormResponse"]="/item/add/"
