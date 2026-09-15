@@ -1,3 +1,4 @@
+<!--Affichage de la page du site avec redirection via des liens pour des ouvrir des pas pages web-->
 {% load static %}
 
 <!DOCTYPE html>
@@ -24,6 +25,7 @@
             </div>
             <ul class="list-unstyled components text-secondary">
                 <li>
+<!--Afficher les url sur la page web-->
                     <a href="{% url 'home' %}"><i class="fas fa-home"></i>Accueil</a>
                 </li>
 
@@ -50,6 +52,7 @@
                 </li>
                 {% endif %}
                 <li>
+    <!--Programmation de la connexion selon la classe et le statut de la personne et la connexion et deconnexion-->
                     <div class="sidebar-footer text-center p-3">
                         <strong>Réau Gestion v1.0.1</strong>
                     </div>
