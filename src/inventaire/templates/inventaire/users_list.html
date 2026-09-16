@@ -1,6 +1,7 @@
 <table class="table table-hover table-striped">
     <thead>
         <tr>
+<!--Liste des utilisateurs avec le Nom , Prénom et Id de carte-->
             <th style="display: none;">id</th>
             <th>Prénom</th>
             <th>Nom</th>
@@ -18,7 +19,7 @@
         {% endfor %}
     <tbody>
 </table>
-
+<!--Barre de navigation de page-->
 <nav><ul class="pagination">
     <li class="page-item {% if page.previous == page.current %}disabled{% endif %}">
         <a class="page-link" href="{% url 'users' %}list/{{ page.previous }}">Précédent</a>
