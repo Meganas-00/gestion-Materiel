@@ -1,3 +1,5 @@
+<!--Liste des emprunt avec le Nom ,le Prénom et les infos de l'emprunt-->
+
 <table class="table table-hover" id="tablerentlist">
     <thead>
         <tr>
@@ -21,7 +23,7 @@
         {% endfor %}
     <tbody>
 </table>
-
+<!--Barre des pages -->
 <nav><ul class="pagination">
     <li class="page-item {% if page.previous == page.current %}disabled{% endif %}">
         <a class="page-link" href="{% url 'listrent' %}/{{ page.previous }}">Précédent</a>
